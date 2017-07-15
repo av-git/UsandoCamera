@@ -56,12 +56,12 @@ public class MainActivity extends AppCompatActivity {
     private void dispararIntentCamera() {
 
         //chamaIntentCameraParaVersao22();
-        chamaIntentCameraParaVersaoMenorOuIgualAPI_22();
-        //chamaIntentCameraParaVersaoAcima23MaisECompativelAteAVersao19();
+        //chamaIntentCameraParaVersaoMenorOuIgualAPI_22();
+        chamaIntentCameraParaVersaoAcima23MaisECompativelAteAVersao19();
     }
 
     /**
-     * Atende API acima de 23. Contudo e compativel ate a versao 19. Menor que isso Nao funciona e devemos
+     * Atende API acima de 23. Contudo e compativel ate a versao 17. Menor que isso Nao funciona e devemos
      * implementar a outra solucao
      */
     private void chamaIntentCameraParaVersaoAcima23MaisECompativelAteAVersao19() {
@@ -69,8 +69,13 @@ public class MainActivity extends AppCompatActivity {
         Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         caminhoDaFoto = getExternalFilesDir(null) + "/" + System.currentTimeMillis() + ".jpg";
         File arquivoFoto = new File(caminhoDaFoto);
-        Uri fotoURI = FileProvider.getUriForFile(MainActivity.this, "com.example.avelino.usandocamera.fileprovider", arquivoFoto);
+        Uri fotoURI = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".fileprovider", arquivoFoto);
+
         intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, fotoURI);
+        //intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", arquivoFoto));
+
+
+
         if (intentCamera.resolveActivity(getPackageManager()) != null) {
 
             List<ResolveInfo> resolvedIntentActivities = getApplicationContext().getPackageManager().queryIntentActivities(intentCamera, PackageManager.MATCH_DEFAULT_ONLY);
@@ -138,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             ImageView foto = (ImageView) findViewById(R.id.imageView);
             Bitmap bitmap = BitmapFactory.decodeFile(caminhoDaFoto);
             foto.setImageBitmap(bitmap);
-            adicionarImagemNaGaleria();
+            //adicionarImagemNaGaleria();
         }
     }
 
