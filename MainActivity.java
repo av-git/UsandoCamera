@@ -3,6 +3,7 @@ package com.example.avelino.usandocamera;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 //VERIFICA SE O USUARIO DEU PERMISSAO PARA O USO DA CAMERA. ATENDE API > 22
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+               if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
                 } else {
                     dispararIntentCamera();
@@ -55,10 +57,14 @@ public class MainActivity extends AppCompatActivity {
 
         //chamaIntentCameraParaVersao22();
         chamaIntentCameraParaVersaoMenorOuIgualAPI_22();
-        //chamaIntentCameraParaVersaoAcima23();
+        //chamaIntentCameraParaVersaoAcima23MaisECompativelAteAVersao19();
     }
 
-    private void chamaIntentCameraParaVersaoAcima23() {
+    /**
+     * Atende API acima de 23. Contudo e compativel ate a versao 19. Menor que isso Nao funciona e devemos
+     * implementar a outra solucao
+     */
+    private void chamaIntentCameraParaVersaoAcima23MaisECompativelAteAVersao19() {
 
         Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         caminhoDaFoto = getExternalFilesDir(null) + "/" + System.currentTimeMillis() + ".jpg";
@@ -66,6 +72,14 @@ public class MainActivity extends AppCompatActivity {
         Uri fotoURI = FileProvider.getUriForFile(MainActivity.this, "com.example.avelino.usandocamera.fileprovider", arquivoFoto);
         intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, fotoURI);
         if (intentCamera.resolveActivity(getPackageManager()) != null) {
+
+            List<ResolveInfo> resolvedIntentActivities = getApplicationContext().getPackageManager().queryIntentActivities(intentCamera, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+                String packageName = resolvedIntentInfo.activityInfo.packageName;
+
+                getApplicationContext().grantUriPermission(packageName, fotoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
             startActivityForResult(intentCamera, REQUEST_IMAGE_CAPTURE);
         }
 
